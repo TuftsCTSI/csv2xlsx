@@ -1,7 +1,10 @@
-name: Build and package with Maven
+name: Build with Maven
 on:
-  release:
-    types: [created]
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
