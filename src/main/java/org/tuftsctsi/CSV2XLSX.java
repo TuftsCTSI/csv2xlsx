@@ -20,29 +20,31 @@ public class CSV2XLSX {
     public static void main(String[] args) {
         try {
 
-            // Get password as first argument
-            if (args.length < 1) {
-                System.out.println("Please provide a password as a command-line argument.");
-                return;
+            // Parse command line arguments
+            String filePath = null;
+            String password = null;
+
+            for (int i = 0; i < args.length; i += 2) {
+                switch (args[i]) {
+                    case "--file":
+                        filePath = args[i + 1];
+                        break;
+                    case "--password":
+                        password = args[i + 1];
+                        break;
+                    default:
+                        System.out.println("Invalid argument: " + args[i]);
+                        System.exit(1);
+                }
             }
 
-            String password = args[0];
+            // Check if both file name and password are provided
+            if (filePath == null || password == null) {
+                System.out.println("Both file name and password are required.");
+                System.exit(1);
+            }
 
-            // Read CSV data from stdin
-            List<List<String>> csvData = readCSV(System.in);
-
-            // Create a new XLSX workbook
-            Workbook workbook = new XSSFWorkbook();
-            Sheet sheet = workbook.createSheet("Sheet1");
-
-            // Write CSV data to XLSX
-            writeDataToSheet(csvData, sheet);
-
-
-            // Save the workbook to an encrypted file
-            encryptAndSaveWorkbook(workbook, password, "output.xlsx");
-
-            System.out.println("Conversion successful!");
+            processFile(filePath, password);
 
         } catch (Exception e) {
             System.out.println("Exception while writting protected xlsx file");
@@ -50,7 +52,15 @@ public class CSV2XLSX {
         }
     }
 
-    private static void encryptAndSaveWorkbook(Workbook workbook, String password, String filePath)
+    private static void processFile(String filePath, String password) throws Exception {
+            List<List<String>> csvData = readCSV(System.in);
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Sheet1");
+            writeDataToSheet(csvData, sheet);
+            encryptAndSaveWorkbook(workbook, filePath, password);
+    }
+
+    private static void encryptAndSaveWorkbook(Workbook workbook, String filePath, String password)
             throws InvalidFormatException, IOException, GeneralSecurityException {
 
         try (POIFSFileSystem fs = new POIFSFileSystem()) {
