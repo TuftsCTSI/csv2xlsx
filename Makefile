@@ -1,5 +1,5 @@
 test: csv2xlsx.jar
-	echo "a,b\n1,2" | java -jar csv2xlsx.jar
+	echo "a,b\n1,2" | java -jar csv2xlsx.jar bing
 
 csv2xlsx.jar: csv2xlsx.java
 	mvn package
