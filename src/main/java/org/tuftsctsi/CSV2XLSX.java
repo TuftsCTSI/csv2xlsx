@@ -1,50 +1,63 @@
 package org.tuftsctsi;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 public class CSV2XLSX {
 
     public static void main(String[] args) {
         try {
-            // Create a new workbook
-            Workbook workbook = new XSSFWorkbook();
+            // Read CSV data from stdin
+            List<List<String>> csvData = readCSV(System.in);
 
-            // Create a sheet in the workbook
+            // Create a new XLSX workbook
+            Workbook workbook = new XSSFWorkbook();
             Sheet sheet = workbook.createSheet("Sheet1");
 
-            // Create a row in the sheet
-            Row headerRow = sheet.createRow(0);
+            // Write CSV data to XLSX
+            writeDataToSheet(csvData, sheet);
 
-            // Create cells in the header row
-            Cell headerCell1 = headerRow.createCell(0);
-            headerCell1.setCellValue("Name");
+            // Save the workbook to a file or do other operations as needed
+            // For example, you can save it to a file using:
+            FileOutputStream outputStream = new FileOutputStream("output.xlsx");
+            workbook.write(outputStream);
+            outputStream.close();
 
-            Cell headerCell2 = headerRow.createCell(1);
-            headerCell2.setCellValue("Age");
-
-            // Create data rows
-            Row dataRow1 = sheet.createRow(1);
-            dataRow1.createCell(0).setCellValue("John");
-            dataRow1.createCell(1).setCellValue(25);
-
-            Row dataRow2 = sheet.createRow(2);
-            dataRow2.createCell(0).setCellValue("Jane");
-            dataRow2.createCell(1).setCellValue(30);
-
-            // Write the workbook content to a file
-            try (FileOutputStream fileOut = new FileOutputStream("workbook.xlsx")) {
-                workbook.write(fileOut);
-                System.out.println("Excel file created successfully!");
-            }
-
-            // Close the workbook
-            workbook.close();
+            System.out.println("Conversion successful!");
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static List<List<String>> readCSV(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+        List<List<String>> data = new java.util.ArrayList<>();
+
+        while ((line = reader.readLine()) != null) {
+            List<String> values = Arrays.asList(line.split(","));
+            data.add(values);
+        }
+
+        return data;
+    }
+
+    private static void writeDataToSheet(List<List<String>> data, Sheet sheet) {
+        int rowIndex = 0;
+        for (List<String> rowData : data) {
+            Row row = sheet.createRow(rowIndex++);
+            int cellIndex = 0;
+            for (String cellData : rowData) {
+                Cell cell = row.createCell(cellIndex++);
+                cell.setCellValue(cellData);
+            }
         }
     }
 }
